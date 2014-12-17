@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="blocks/bookmarks/db" VERSION="20141217" COMMENT="XMLDB file for Moodle blocks/bookmarks"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="block_bookmarks" COMMENT="Each user can create bookmarks within Moodle Book chapter text.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="start_nodetree" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Path to the DOM element that contains starting point of an user bookmark (relative to chapter root node). This is also DOM element retrieved through Range object."/>
+        <FIELD NAME="end_nodetree" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Path to the DOM element that contains ending point of an user bookmark (relative to chapter root node). This is also DOM element retrieved through Range object."/>
+        <FIELD NAME="start_offset" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Offset of user bookmark selection in the DOM element that contains starting point of an user bookmark. This is retrieved through Range object."/>
+        <FIELD NAME="end_offset" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Offset of user bookmark selection in the DOM element that contains ending point of an user bookmark. This is retrieved through Range object."/>
+        <FIELD NAME="title" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="chapterid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_index" UNIQUE="false" FIELDS="userid"/>
+        <INDEX NAME="chapterid_index" UNIQUE="false" FIELDS="chapterid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

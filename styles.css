@@ -1,0 +1,7 @@
+body.jsdisabled .block_bookmarks {
+    background:red !important;
+}
+
+.btn_backToChapter{
+	display: none;
+}
