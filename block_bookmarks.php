@@ -99,6 +99,39 @@ class block_bookmarks extends block_base {
 
 
 		$content = '';
+		/*****************************
+
+			BOOKMARK LISTING PART
+
+		*****************************/
+		$attrs = array('class' => 'bookmarks_listing');
+		$content .= html_writer::start_tag('nav', $attrs);
+		$content .= html_writer::start_tag('ul');
+
+			// get one tamplate element here...
+			$bookmarks = $this->get_all_bookmarks();
+			//var_dump($bookmarks);
+			foreach ($bookmarks as $bookmark) {
+				$content .= html_writer::start_tag('li');
+				$attrs = array(
+					'href' => '#',
+					'data-startNodeTree' => $bookmark->start_nodetree,
+					'data-endNodeTree' => $bookmark->end_nodetree,
+					'data-startOffset' => $bookmark->start_offset,
+					'data-endOffset' => $bookmark->end_offset
+				);
+				$content .= html_writer::tag('a', $bookmark->title, $attrs);
+				$content .= html_writer::end_tag('li');
+			}
+
+		$content .= html_writer::end_tag('ul');
+		$content .= html_writer::end_tag('nav');
+
+		/*****************************
+
+			BOOKMARK CREATION PART
+
+		*****************************/
 		$attrs = array('class' => 'bookmarks_creation');
 		$content .= html_writer::start_tag('div', $attrs);
 
@@ -130,11 +163,24 @@ class block_bookmarks extends block_base {
 
 		$content .= html_writer::end_tag('div');
 
+
+
+
+		/****************************************/
 		$this->content->text = $content;
 
 
 		
 		return $this->content;
+	}
+
+	private function get_all_bookmarks(){
+		global $USER;
+		global $DB;
+		global $SESSION;
+
+		$where = array('userid' => $USER->id, 'chapterid' => $SESSION->chapterid);
+		return $DB->get_records('block_bookmarks', $where);
 	}
 
 	// za dozvoliti više instanci istog modula unutar istog course-a

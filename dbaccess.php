@@ -1,4 +1,6 @@
 <?php
+// this is used for AJAX dbaccess
+
 require_once('../../config.php');
 //require_once($CFG->dirroot.'/blocks/accessibility/lib.php');
 require_login();

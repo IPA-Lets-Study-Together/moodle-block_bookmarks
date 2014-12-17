@@ -59,8 +59,8 @@ M.bkmCreation = {
 	// ============================
 	beginBookmarkCreation: function(e){
 		// Get user selection
-		// var a = M.bkmCreation.getSelectionPosition();
-		this.currentSelection = this.getSelectionPosition();
+		// var a = M.bkmCreation._getSelectionPosition();
+		this.currentSelection = this._getSelectionPosition();
 		if(this.currentSelection == null) return false; // if there is no selection in the area of chapter's root element
 
 		// Selection is stored now, focus title input field and wait
@@ -81,16 +81,18 @@ M.bkmCreation = {
 		var title = null;
 		var titleVal = this.fld_bookmarkTitle.get('value');
 		if(titleVal) title = titleVal;
-		var ajax = this.storeBookmarkToDatabase(title, this.currentSelection)
+		var ajax = this._storeBookmarkToDatabase(title, this.currentSelection)
 
 
 		// daj status
 		this.btn_backToChapter.setStyle('display', 'block');
 		this.btn_backToChapter.focus();
+
+		// resetiraj sva polja...
 	},
 
 	// ============================
-	storeBookmarkToDatabase: function(title, selection){
+	_storeBookmarkToDatabase: function(title, selection){
 
 		var dbData = {
 			op: 'insert',
@@ -122,7 +124,7 @@ M.bkmCreation = {
 
 	// get start and end node, their tree path and offsets of selection within those nodes
 	// ============================
-	getSelectionPosition: function(){
+	_getSelectionPosition: function(){
 		// initialize return value
 		var selection = {
 			startNode: null,
@@ -181,15 +183,15 @@ M.bkmCreation = {
 		selection.endNodeType = null;
 
 		// populate node trees
-		selection.startNodeTree = M.bkmCreation.calculateNodelistTree(selection.startNode);
-		selection.endNodeTree = M.bkmCreation.calculateNodelistTree(selection.endNode);
+		selection.startNodeTree = M.bkmCreation._calculateNodelistTree(selection.startNode);
+		selection.endNodeTree = M.bkmCreation._calculateNodelistTree(selection.endNode);
 
 		return selection;
 	},
 
 	// determine depth of parent elements (specific location path as a node tree of parents)
 	// ============================
-	calculateNodelistTree: function(node){
+	_calculateNodelistTree: function(node){
 		var rootNode = M.bkmCreation.chapterRootNode;
 		var nodeTree = Array();
 		var tempParent = node;
