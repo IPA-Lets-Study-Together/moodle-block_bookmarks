@@ -22,6 +22,10 @@ class block_bookmarks extends block_base {
 	public function specialization() {
 
 		global $SESSION;
+		global $chapter;
+
+		if(isset($chapter->id))	$SESSION->chapterid = $chapter->id;
+		else unset($SESSION->chapterid);
 
 	  /*if (!empty($this->config->title)) {
 	    $this->title = $this->config->title;
@@ -30,8 +34,8 @@ class block_bookmarks extends block_base {
 	  }*/
 
 	  // store chapterid so that ajax can access it while inserting bookmark to db
-	  if(isset($_REQUEST['chapterid']))
-	  $SESSION->chapterid = $_REQUEST['chapterid'];
+	 // if(isset($_REQUEST['chapterid']))
+	  //$SESSION->chapterid = $_REQUEST['chapterid'];
 	 
 	  /*if (empty($this->config->text)) {
 	    $this->config->text = 'Default text ...';
@@ -111,18 +115,22 @@ class block_bookmarks extends block_base {
 			// get one tamplate element here...
 			$bookmarks = $this->get_all_bookmarks();
 			//var_dump($bookmarks);
-			foreach ($bookmarks as $bookmark) {
-				$content .= html_writer::start_tag('li');
-				$attrs = array(
-					'href' => '#',
-					'data-startNodeTree' => $bookmark->start_nodetree,
-					'data-endNodeTree' => $bookmark->end_nodetree,
-					'data-startOffset' => $bookmark->start_offset,
-					'data-endOffset' => $bookmark->end_offset
-				);
-				$content .= html_writer::tag('a', $bookmark->title, $attrs);
-				$content .= html_writer::end_tag('li');
+
+			if($bookmarks){
+				foreach ($bookmarks as $bookmark) {
+					$content .= html_writer::start_tag('li');
+					$attrs = array(
+						'href' => '#',
+						'data-startNodeTree' => $bookmark->start_nodetree,
+						'data-endNodeTree' => $bookmark->end_nodetree,
+						'data-startOffset' => $bookmark->start_offset,
+						'data-endOffset' => $bookmark->end_offset
+					);
+					$content .= html_writer::tag('a', $bookmark->title, $attrs);
+					$content .= html_writer::end_tag('li');
+				}
 			}
+				//var_dump($GLOBALS);
 
 		$content .= html_writer::end_tag('ul');
 		$content .= html_writer::end_tag('nav');
@@ -177,10 +185,14 @@ class block_bookmarks extends block_base {
 	private function get_all_bookmarks(){
 		global $USER;
 		global $DB;
-		global $SESSION;
+		global $chapter;
 
-		$where = array('userid' => $USER->id, 'chapterid' => $SESSION->chapterid);
-		return $DB->get_records('block_bookmarks', $where);
+		if(isset($chapter->id)){
+			$where = array('userid' => $USER->id, 'chapterid' => $chapter->id);
+			return $DB->get_records('block_bookmarks', $where);
+		}
+		else return null;
+		
 	}
 
 	// za dozvoliti više instanci istog modula unutar istog course-a

@@ -17,7 +17,7 @@ switch ($op) {
     	array_shift($_POST);
         $db_data = $_POST;
         $db_data['userid'] = $USER->id;
-        $db_data['chapterid'] = $SESSION->chapterid; // from block initialization
+        $db_data['chapterid'] = $SESSION->chapterid; // from block
         echo ($DB->insert_record('block_bookmarks', $db_data));
     
     
