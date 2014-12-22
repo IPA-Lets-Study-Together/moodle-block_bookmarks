@@ -108,6 +108,9 @@ class block_bookmarks extends block_base {
 			BOOKMARK LISTING PART
 
 		*****************************/
+		$content .= html_writer::tag('h5', 'Korisničke oznake');
+
+
 		$attrs = array('class' => 'bookmarks_listing');
 		$content .= html_writer::start_tag('nav', $attrs);
 		$content .= html_writer::start_tag('ul');
@@ -126,6 +129,7 @@ class block_bookmarks extends block_base {
 						'data-startOffset' => $bookmark->start_offset,
 						'data-endOffset' => $bookmark->end_offset
 					);
+					if($bookmark->title == 'null') $bookmark->title = "Oznaka bez naslova";
 					$content .= html_writer::tag('a', $bookmark->title, $attrs);
 					$content .= html_writer::end_tag('li');
 				}
@@ -143,31 +147,41 @@ class block_bookmarks extends block_base {
 		$attrs = array('class' => 'bookmarks_creation');
 		$content .= html_writer::start_tag('div', $attrs);
 
-			$content .= html_writer::tag('h4', '???? INSERT NEW BOOKMARK', $attrs);
+			// TRANSLATE: ???? INSERT NEW BOOKMARK
+			$content .= html_writer::tag('h5', 'Unos nove oznake');
 
-			// BOOKMARK TITLE TEXT FIELD
-			$attrs = array(
-				'class' => 'fld_bookmarkTitle', 
-				'type' => 'text',
-				'placeholder' => '???? Unesite naziv i pritisnite enter'
-			);
-			$content .= html_writer::empty_tag('input', $attrs);
+			// USER-FRIENDLY LABEL
+			$attrs = array('class' => 'bookmarkTitleLabel');
+			$content .= html_writer::start_tag('label', $attrs);
+				$content .= html_writer::tag('div', 'Unesite naziv i pritisnite enter');
+
+				// BOOKMARK TITLE TEXT FIELD
+				$attrs = array(
+					'class' => 'fld_bookmarkTitle', 
+					'type' => 'text'//,
+					// TRANSLATE: ????? Unesite naziv i pritisnite enter
+					//'placeholder' => 'Unesite naziv i pritisnite enter'
+				);
+				$content .= html_writer::empty_tag('input', $attrs);
+
+			$content .= html_writer::end_tag('label');
 
 			// BOOKMARK INSERTION BUTTON
 			$attrs = array(
 				'class' => 'btn_storeSelection',
 				'type' => 'button',
-				'value' => '???? DUGME'
+				'value' => 'Pohrani označen tekst'
 			);
 			$content .= html_writer::empty_tag('input', $attrs);
 
 			// BOOKMARK CREATION STATUS MESSAGE
-			$attrs = array('class' => 'btn_backToChapter');
-			$content .= html_writer::tag('a', '???? TEEEST', $attrs);
+			$attrs = array('class' => 'btn_backToChapter', 'href' => '#newbookmark');
+			// TRANSLATE: ???? TEEEST
+			$content .= html_writer::tag('a', 'Korisnička oznaka je kreirana. Pritisnite ovdje za povratak na tekst poglavlja', $attrs);
 
 			// BOOKMARK CREATION INSTRUCTIONS
-			$content .= html_writer::tag('div', '???? INSTRUCTIONS');
-
+			// TRANSLATE: ???? INSTRUCTIONS
+			$content .= html_writer::tag('div', 'Da biste kreirali korisničku oznaku prvo označite željeni tekst poglavlja, zatim pritisnite ctrl+shift+space, unesite naziv oznake i pritisnite enter.');
 
 		$content .= html_writer::end_tag('div');
 
@@ -175,6 +189,11 @@ class block_bookmarks extends block_base {
 
 
 		/****************************************/
+$content .= html_writer::tag('div', '<br><div class="alert alert-danger" role="alert">
+  <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+  <span class="sr-only">NAPOMENA:</span>
+  Ovo je testna verzija blocka. Neke funkcionalnosti još nisu implementirane.
+</div>');
 		$this->content->text = $content;
 
 

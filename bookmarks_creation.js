@@ -8,15 +8,18 @@ M.bkmCreation = {
 
 	init: function(Y, bookmark_creation_key) {
 		// CACHE
+
 		this.Y = Y;
 		this.btn_backToChapter = Y.one('.btn_backToChapter');
 		this.btn_storeSelection = Y.one('.btn_storeSelection');
 		this.fld_bookmarkTitle = Y.one('.fld_bookmarkTitle');
+		this.bookmarkTitleLabel = Y.one('.bookmarkTitleLabel');
+		this.bookmarksList = Y.one('.bookmarks_listing ul');
 
 		// initialize chapter container as DOM object
 		var chapterRootNode = Y.one(this.chapterRootNodeClass);
 		if (chapterRootNode !== null) { this.chapterRootNode = chapterRootNode.getDOMNode() }
-		if(!this.chapterRootNode) alert('????? Error: Cannot determine chapter root node.');
+		//if(!this.chapterRootNode) alert('????? Error: Cannot determine chapter root node.');
 
 
 		// assign keyboard event
@@ -30,9 +33,46 @@ M.bkmCreation = {
 		// assign bookmark creation button
 		// ==================================================================
 		this.btn_storeSelection.on('click', this.beginBookmarkCreation, this);
+		this.btn_storeSelection.hide();
 
 		// assign bookmark AJAX ?? store
 		this.fld_bookmarkTitle.on('key', this.finishBookmarkCreation, 'up:enter', this); 
+		this.fld_bookmarkTitle.hide();
+		this.bookmarkTitleLabel.hide();
+
+
+		this.btn_backToChapter.on('click', function(){
+			var mark = document.createElement("a");
+			mark.setAttribute('href', '#');
+			mark.setAttribute('name', 'newbookmark');
+			mark.setAttribute('id', 'newbookmark');
+			M.bkmMapper._insertIntoTextNode(M.bkmCreation.currentSelection.endNode, mark, M.bkmCreation.currentSelection.endOffset);
+
+			mark.focus();
+			Y.one(mark).on('blur', function(){
+				var parent = mark.parentNode
+				parent.removeChild(mark);
+				parent.normalize(); // merge separate text nodes back together
+			})
+
+			Y.one(this).hide();
+			return false;
+		});
+
+		
+
+		// IDEA:
+		// dynamic jumpers??
+		Y.all('.bookmarks_listing a').each(function(bkm){
+
+			bkm.on('click', M.bkmCreation.accessBookmark);
+		});
+
+// kao live u jQuery
+
+	/*	YUI().use('event', function(Y) {
+  Y.delegate("click", M.bkmCreation.accessBookmark, "a", ".bookmarks_listing");
+});*/
 
 
 		this.fld_bookmarkTitle.on('key', this.abortBookmarkCreation, 'up:esc', this); 
@@ -54,6 +94,39 @@ M.bkmCreation = {
 		// pohrana u bazu
 	},
 
+
+
+accessBookmark:function(bookmark){
+
+
+			var mark = document.createElement("a");
+			mark.setAttribute('href', '#');
+			mark.setAttribute('name', 'newbookmark');
+			mark.setAttribute('id', 'newbookmark');
+			this.setAttribute('href', '#newbookmark');
+
+			var startNodeTree = eval('['+this.getAttribute('data-startNodeTree')+']');
+			var endNodeTree = eval('['+this.getAttribute('data-endNodeTree')+']');
+			var startOffset = parseInt(this.getAttribute('data-startOffset'));
+			var endOffset = parseInt(this.getAttribute('data-endOffset'));
+
+			var startNode = M.bkmMapper._findNodeInDOM(startNodeTree, M.bkmCreation.chapterRootNode);
+			M.bkmMapper._insertIntoTextNode(startNode, mark, startOffset);
+
+			//debugger;
+			mark.focus();
+			Y.one(mark).on('blur', function(){
+				var parent = mark.parentNode
+				parent.removeChild(mark);
+				parent.normalize(); // merge separate text nodes back together
+			})
+
+			return false;
+
+		},
+
+
+
 	// 01. User selects the text and then the script temporarily stores the selection
 	// It triggers by accessing bookmark creation button or assigned keyboard shortcut
 	// ============================
@@ -64,6 +137,8 @@ M.bkmCreation = {
 		if(this.currentSelection == null) return false; // if there is no selection in the area of chapter's root element
 
 		// Selection is stored now, focus title input field and wait
+		this.fld_bookmarkTitle.show();
+		this.bookmarkTitleLabel.show();
 		this.fld_bookmarkTitle.focus();
 
 		// if user doesn't enter a title, the selection should be earsed ?? NE?
@@ -83,12 +158,25 @@ M.bkmCreation = {
 		if(titleVal) title = titleVal;
 		var ajax = this._storeBookmarkToDatabase(title, this.currentSelection)
 
+		// resetiraj sva polja...
+		this.fld_bookmarkTitle.set('value', '');
+		this.fld_bookmarkTitle.hide();
+		this.bookmarkTitleLabel.hide();
+
+
+
+
+		// dodaj dinamički na listu
+		//this.bookmarksList.append('<li><a href="#newbookmark" data-startNodeTree data-endNodeTree data-startOffset data-endOffset>'+title+'<a></li>')
+
+		// kreiraj mjesto za povratak
+		//M.bkmMapper._insertIntoTextNode(this.currentSelection.endNode, this.currentSelection.endOffset);
+
 
 		// daj status
 		this.btn_backToChapter.setStyle('display', 'block');
 		this.btn_backToChapter.focus();
 
-		// resetiraj sva polja...
 	},
 
 	// ============================
@@ -103,13 +191,17 @@ M.bkmCreation = {
 			title: title
 		}
 
+		// ????
+		this.bookmarksList.append('<li><a href="#newbookmark" data-startNodeTree="'+dbData.start_nodetree+'" data-endNodeTree"'+dbData.end_nodetree+'" data-startOffset"'+dbData.start_offset+'" data-endOffset"'+dbData.end_offset+'">'+title+'<a></li>')
+		// TO-DO assign onclick event
+
 		Y.io(this.DB_PATH, {
 			data: dbData,
 			method: 'post',
 			on: {
 				success: function(id, o) {
-					debugger;
-					alert('SUCCESS')
+					//debugger;
+					//alert('SUCCESS')
 					//M.block_accessibility.show_message(M.util.get_string('saved', 'block_accessibility'));
 					//setTimeout("M.block_accessibility.show_message('')", 5000);
 				},
@@ -125,6 +217,7 @@ M.bkmCreation = {
 	// get start and end node, their tree path and offsets of selection within those nodes
 	// ============================
 	_getSelectionPosition: function(){
+		//debugger;
 		// initialize return value
 		var selection = {
 			startNode: null,
@@ -166,13 +259,14 @@ M.bkmCreation = {
 			}
 			// FOR IE (this must come last!!)
 			else if (document.selection) { 
+				alert('THIS IS IE')
 				userSelection = document.selection.createRange();
 				alert('????? ERROR: Ovo još nije implementirano')
 			}	// else userSelection = document.getSelection(); // no need for this...
 			
 		} 
 		catch (err) {
-			alert(' ????? It seems your browser cannot be used for creating user bookmarks. Please use a moderm browser. Error Message: ' + err)
+			//alert(' ????? It seems your browser cannot be used for creating user bookmarks. Please use a moderm browser. Error Message: ' + err)
 		}
 
 		// check if selection is within book chapter?

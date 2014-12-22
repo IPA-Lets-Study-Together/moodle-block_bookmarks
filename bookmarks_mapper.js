@@ -3,7 +3,7 @@ M.bkmMapper = {
 
 	init: function(Y) {
 		// 01. Get all bookmarks for this user in this chapter
-		var allBookmarks = Y.all('.bookmarks_listing a');
+		/*var allBookmarks = Y.all('.bookmarks_listing a');
 
 		allBookmarks.each(function(bookmark){
 			// 02. parse bookmark data
@@ -22,7 +22,7 @@ M.bkmMapper = {
 			// 04. link block bookmarks to chapter locations
 			this._insertIntoTextNode(endNode, endOffset);
 
-		}, this);
+		}, this);*/
 
 		
 
@@ -46,7 +46,7 @@ M.bkmMapper = {
 		return tempParent;
 	},
 
-	/*_insertIntoTextNode: function (textNode, newNode, offset) {
+	_insertIntoTextNode: function (textNode, newNode, offset) {
 		if(textNode.nodeType == 3) { // 3 => a Text Node
 			var strSrc = textNode.nodeValue; // for Text Nodes, the nodeValue property contains the text
 			if(offset >= 0) {
@@ -68,8 +68,9 @@ M.bkmMapper = {
 			return true;
 		}
 		else return false;
-	},*/
+	}
 
+	/*
 	_insertIntoTextNode: function (textNode, offset) {
 		debugger;
 		if(offset < 0) return;
@@ -103,9 +104,12 @@ M.bkmMapper = {
 			if( endPosition > startPosition) wrapper.appendChild(document.createTextNode(wrapper.originalContent.substring(startPosition,endPosition)));
 			
 			// custom part (insertion)
-			var mark = document.createElement("mark");
-			mark.appendChild(document.createTextNode("XXXX"));
-			wrapper.appendChild(mark);		
+			var mark = document.createElement("a");
+			mark.setAttribute('href', '#');
+			mark.setAttribute('name', 'newbookmark');
+			mark.setAttribute('id', 'newbookmark');
+			//mark.appendChild(document.createTextNode("XXXX"));
+			wrapper.appendChild(mark);
 		}
 
 		// append the rest
@@ -115,6 +119,6 @@ M.bkmMapper = {
 
 		// swap old node for a new one
 		textNode.parentNode.replaceChild(wrapper, textNode);
-	}
+	}*/
 
 }
