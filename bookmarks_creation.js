@@ -1,28 +1,66 @@
+/*
+
+	HOW IT WORKS:
+	CREATING BOOKMARKS:
+	1. select the text he wants to create a bookmark for
+	2. press ctrl+shift+space to begin bookmark creation process, the bookmark title input form appear
+	3. enter a title and submit a form pressing enter key. leaving a form or pressing esc aborts the action
+	4. the bookmark is now created, the focus sould be on the link that can switch a focus back to a chapter text
+	5. using the link, return to a chapter and continue to read the text. The links will be deleted not to mess the chapter structure
+
+	USING BOOKMARKS:
+	1. use one of the already created bookmars from the block
+	2. accessing the bookmark will create links to the start and the end of a bookmark within the chapter in real time. Focus will be switched to the beginning
+	3. start link will be deleted once it lose the focus not to mess the chapter structure, end link remains
+	4. while end link is reached, user can access it to return to a bookmarks list. Once it loses the focus it will also be deleted
+
+
+
+*/
+
+
 M.bkmCreation = {
 
-	chapterRootNodeClass: '.book_content',
+	chapterRootNodeClass: 'book_content',
 	chapterRootNode: null,
 	currentSelection: null,
+
+	bkmStartPinClass: 'bookmark_start',
+	bkmEndPinClass: 'bookmark_end',
+	bkmLinkClass: 'bookmark_link',
+
+	// unique id generation
+	ID_PREFIX : 'bookmark_block_',
+	USED_IDs : new Array(),
+	ID_ATTR_LENGTH : 10, // generated id attribute length + ID_PREFIX part
 
 	DB_PATH: M.cfg.wwwroot+'/blocks/bookmarks/dbaccess.php',
 
 	init: function(Y, bookmark_creation_key) {
 		// CACHE
-
+		// ==================================================================
 		this.Y = Y;
 		this.btn_backToChapter = Y.one('.btn_backToChapter');
-		this.btn_storeSelection = Y.one('.btn_storeSelection');
+		this.btn_insertBookmark = Y.one('.btn_insertBookmark');
+		//this.btn_storeSelection = Y.one('.btn_storeSelection'); // this button is removed
+		this.form_insertBookmark = Y.one('.form_insertBookmark');
 		this.fld_bookmarkTitle = Y.one('.fld_bookmarkTitle');
 		this.bookmarkTitleLabel = Y.one('.bookmarkTitleLabel');
 		this.bookmarksList = Y.one('.bookmarks_listing ul');
 
+		// TO-DO: Check if block is displyed within moodle book chapter
+		// TO-DO: check for # hash mark within URL to focus desired bookmark directly on load
+		// IMPORTANT: There should be only one block instance on the page since all the buttons are related to a single block
+
+
 		// initialize chapter container as DOM object
-		var chapterRootNode = Y.one(this.chapterRootNodeClass);
+		// ==================================================================
+		var chapterRootNode = Y.one('.'+this.chapterRootNodeClass);
 		if (chapterRootNode !== null) { this.chapterRootNode = chapterRootNode.getDOMNode() }
 		//if(!this.chapterRootNode) alert('????? Error: Cannot determine chapter root node.');
 
 
-		// assign keyboard event
+		// assign keyboard event (to begin bookmark creation process)
 		// ==================================================================
 		//YUI().use("event-key", function (Y) { // referenced already in php script... //});
 		//Y.Node.DOM_EVENTS.key.eventDef.KEY_MAP.space = '32'; // e.keyCode
@@ -32,98 +70,46 @@ M.bkmCreation = {
 		
 		// assign bookmark creation button
 		// ==================================================================
-		this.btn_storeSelection.on('click', this.beginBookmarkCreation, this);
-		this.btn_storeSelection.hide();
+		// TO-DO: this would be alternative to capture selection before entering title. Would be nice to have it
+		//this.btn_storeSelection.on('click', this.beginBookmarkCreation, this);
 
-		// assign bookmark AJAX ?? store
-		this.fld_bookmarkTitle.on('key', this.finishBookmarkCreation, 'up:enter', this); 
-		this.fld_bookmarkTitle.hide();
-		this.bookmarkTitleLabel.hide();
+		// assign bookmark creation textbox and action on enter (to finish bookmark creation process)
+		// ==================================================================
+		//this.fld_bookmarkTitle.on('key', this.finishBookmarkCreation, 'up:enter', this); 
+		this.form_insertBookmark.on('submit', this.finishBookmarkCreation, this); 
+		this.fld_bookmarkTitle.on('key', this.abortBookmarkCreation, 'up:esc', this); 
+		this.fld_bookmarkTitle.on('blur', this.abortBookmarkCreation, this); 
+		this.btn_insertBookmark.hide(); // hide it, since textbox blur aborts the action, accessing this button will cause it as well
+		this.form_insertBookmark.hide();
 
+		// assign back to chapter link to access after bookmark is created 
+		// ==================================================================
+		this.btn_backToChapter.on('click', this.accessBookmarksEnd);
 
-		this.btn_backToChapter.on('click', function(){
-			var mark = document.createElement("a");
-			mark.setAttribute('href', '#');
-			mark.setAttribute('name', 'newbookmark');
-			mark.setAttribute('id', 'newbookmark');
-			M.bkmMapper._insertIntoTextNode(M.bkmCreation.currentSelection.endNode, mark, M.bkmCreation.currentSelection.endOffset);
-
-			mark.focus();
-			Y.one(mark).on('blur', function(){
-				var parent = mark.parentNode
-				parent.removeChild(mark);
-				parent.normalize(); // merge separate text nodes back together
-			})
-
-			Y.one(this).hide();
-			return false;
-		});
-
-		
-
-		// IDEA:
-		// dynamic jumpers??
-		Y.all('.bookmarks_listing a').each(function(bkm){
-
+		// Initialize all previous bookmarks, assign onclick event
+		// ==================================================================
+		Y.all('.bookmarks_listing ul a').each(function(bkm){
+			var randomID = M.bkmCreation._generateUniqueId(M.bkmCreation.ID_ATTR_LENGTH);
+			bkm.setAttribute('href', '#'+randomID);
+			bkm.setAttribute('id', 'link_'+ randomID);
+			bkm.setAttribute('class', this.bkmLinkClass);
 			bkm.on('click', M.bkmCreation.accessBookmark);
 		});
-
-// kao live u jQuery
-
-	/*	YUI().use('event', function(Y) {
-  Y.delegate("click", M.bkmCreation.accessBookmark, "a", ".bookmarks_listing");
-});*/
-
-
-		this.fld_bookmarkTitle.on('key', this.abortBookmarkCreation, 'up:esc', this); 
-		//Y.one('.fld_bookmarkTitle').on('blur', this.abortBookmarkCreation, 'up:esc', this); 
-
-		// OBJASNI TU U KLODU KOJA JE PROCEDURA ZA BOOKMARKS??? DEKLE BOOKMARK SE NA ENTER POHRANJUJE, a ne na botun, treba li nam onda botun?? treba da spremimo selekciju (kao capture selection)
+		// kao live u jQuery
+		/*	YUI().use('event', function(Y) {
+  				Y.delegate("click", M.bkmCreation.accessBookmark, "a", ".bookmarks_listing");
+		});*/
 
 
 
+		// Check if this browser is supported
+		if (typeof window.getSelection == 'function') 
+			Y.all('.browser-unsupported-message').hide();
 
 
-
-
-		// get DOM elements tree and selection offsets
-		// focus to input elemnt to enter bookmark title (esc key to abort, stavi u upute)
-
-		// dovoljna je smao jedna instanca!! ograniči to jer botuni su vezani samo za prvu skriptu...
-
-		// pohrana u bazu
 	},
 
 
-
-accessBookmark:function(bookmark){
-
-
-			var mark = document.createElement("a");
-			mark.setAttribute('href', '#');
-			mark.setAttribute('name', 'newbookmark');
-			mark.setAttribute('id', 'newbookmark');
-			this.setAttribute('href', '#newbookmark');
-
-			var startNodeTree = eval('['+this.getAttribute('data-startNodeTree')+']');
-			var endNodeTree = eval('['+this.getAttribute('data-endNodeTree')+']');
-			var startOffset = parseInt(this.getAttribute('data-startOffset'));
-			var endOffset = parseInt(this.getAttribute('data-endOffset'));
-
-			var startNode = M.bkmMapper._findNodeInDOM(startNodeTree, M.bkmCreation.chapterRootNode);
-			M.bkmMapper._insertIntoTextNode(startNode, mark, startOffset);
-
-			//debugger;
-			mark.focus();
-			Y.one(mark).on('blur', function(){
-				var parent = mark.parentNode
-				parent.removeChild(mark);
-				parent.normalize(); // merge separate text nodes back together
-			})
-
-			return false;
-
-		},
 
 
 
@@ -131,23 +117,25 @@ accessBookmark:function(bookmark){
 	// It triggers by accessing bookmark creation button or assigned keyboard shortcut
 	// ============================
 	beginBookmarkCreation: function(e){
+		this._clearChapterTextFromPins();
+
 		// Get user selection
 		// var a = M.bkmCreation._getSelectionPosition();
 		this.currentSelection = this._getSelectionPosition();
 		if(this.currentSelection == null) return false; // if there is no selection in the area of chapter's root element
 
 		// Selection is stored now, focus title input field and wait
-		this.fld_bookmarkTitle.show();
-		this.bookmarkTitleLabel.show();
+		this.form_insertBookmark.show();
 		this.fld_bookmarkTitle.focus();
-
-		// if user doesn't enter a title, the selection should be earsed ?? NE?
+		// if user doesn't enter a title, the selection should be earsed (abortBookmarkCreation will be triggerd) 
 	},
 
 	// 02. after user has entered a bookmark title and pressed enter key
 	// ============================
 	finishBookmarkCreation: function(e){
-		// kreiraj mjesto za povratak na chapter
+		// to cancel submit
+		e.preventDefault();
+		//Y.util.Event.preventDefault(e); 
 
 		// selection is stored before?
 		if(!this.currentSelection) return false;
@@ -156,45 +144,156 @@ accessBookmark:function(bookmark){
 		var title = null;
 		var titleVal = this.fld_bookmarkTitle.get('value');
 		if(titleVal) title = titleVal;
-		var ajax = this._storeBookmarkToDatabase(title, this.currentSelection)
+		else title = M.util.get_string('untitled-bkm-item', 'block_accessibility');
+		var dbData = {
+			op: 'insert',
+			start_offset: this.currentSelection.startOffset,
+			end_offset: this.currentSelection.endOffset,
+			start_nodetree: this.currentSelection.startNodeTree.toString(),
+			end_nodetree: this.currentSelection.endNodeTree.toString(),
+			title: title
+		}
+		var ajax = this._storeBookmarkToDatabase(dbData);
 
-		// resetiraj sva polja...
-		this.fld_bookmarkTitle.set('value', '');
-		this.fld_bookmarkTitle.hide();
-		this.bookmarkTitleLabel.hide();
 
+		// delete no bookmarks status message (this chapter doesn't contain any bookmarks)
+		Y.all('.no-bookmarks').remove();
 
-
-
-		// dodaj dinamički na listu
-		//this.bookmarksList.append('<li><a href="#newbookmark" data-startNodeTree data-endNodeTree data-startOffset data-endOffset>'+title+'<a></li>')
+		// dodaj dinamički na listu, make sure to follow how php is generating it...
+		var randomID = this._generateUniqueId(this.ID_ATTR_LENGTH);
+		var newLI = document.createElement("li");
+		var newA = document.createElement("a");
+		newA.setAttribute('data-startNodeTree', dbData.start_nodetree);
+		newA.setAttribute('data-endNodeTree', dbData.end_nodetree);
+		newA.setAttribute('data-startOffset', dbData.start_offset);
+		newA.setAttribute('data-endOffset', dbData.end_offset);
+		newA.setAttribute('href', '#'+randomID);
+		newA.setAttribute('id', 'link_'+ randomID);
+		newA.setAttribute('class', this.bkmLinkClass);
+		newA.innerHTML = title;
+		Y.one(newA).on('click', this.accessBookmark);
+		newLI.appendChild(newA);
+		this.bookmarksList.append(newLI);
 
 		// kreiraj mjesto za povratak
-		//M.bkmMapper._insertIntoTextNode(this.currentSelection.endNode, this.currentSelection.endOffset);
-
-
-		// daj status
-		this.btn_backToChapter.setStyle('display', 'block');
+		// display bookmark creation status and focus it
+		// TO-DO: it would be cool to make some beep sound for success and failed status
+		// TO-DO: ARIA LIVE regions https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+		this.btn_backToChapter.setAttribute('data-endNodeTree', dbData.end_nodetree);
+		this.btn_backToChapter.setAttribute('data-endOffset', dbData.end_offset);
+		this.btn_backToChapter.setAttribute('href', '#'+randomID);
+		this.btn_backToChapter.setStyle('display','block'); // show() doesn't work
 		this.btn_backToChapter.focus();
+
+		// on bkm title text box blur, the abortBookmarkCreation will be triggerd and form will be reset 
+		return false; 
+	},
+
+	// if user selection is captured but bookmark label is not confirmed and stored to a db. Occurs if user leaves bookmark label text field without pressing enter or using ESC button
+	// ============================
+	abortBookmarkCreation: function(e){
+		this.fld_bookmarkTitle.set('value', '');
+		this.form_insertBookmark.hide();
+		this.currentSelection = null;
+	},
+
+	// from a main menu jump to a bookmark located somewhere between the chapter. Dinamically create start and end points
+	// ============================
+	accessBookmark:function(){
+		M.bkmCreation._clearChapterTextFromPins();
+
+
+		var id = this.getAttribute('href').substring(1);
+		// TO-DO: check if pin exists already
+
+		var startPinEl = M.bkmCreation._createBkmStartPin(id);
+		var endPinEl = M.bkmCreation._createBkmEndPin(id);
+
+		var startNodeTree = eval('['+this.getAttribute('data-startNodeTree')+']');
+		var endNodeTree = eval('['+this.getAttribute('data-endNodeTree')+']');
+		var startOffset = parseInt(this.getAttribute('data-startOffset'));
+		var endOffset = parseInt(this.getAttribute('data-endOffset'));
+
+		// mapper module, always end node first not to mess the structure
+		var endNode = M.bkmMapper._findNodeInDOM(endNodeTree, M.bkmCreation.chapterRootNode);
+		M.bkmMapper._insertIntoTextNode(endNode, endPinEl, endOffset);		
+		var startNode = M.bkmMapper._findNodeInDOM(startNodeTree, M.bkmCreation.chapterRootNode);
+		M.bkmMapper._insertIntoTextNode(startNode, startPinEl, startOffset);
+
+		startPinEl.focus();
+		return false;
 
 	},
 
+	// from a back to chapter linke. Dinamically create end point to return to
 	// ============================
-	_storeBookmarkToDatabase: function(title, selection){
+	accessBookmarksEnd: function(){
+		M.bkmCreation._clearChapterTextFromPins();
 
-		var dbData = {
-			op: 'insert',
-			start_offset: selection.startOffset,
-			end_offset: selection.endOffset,
-			start_nodetree: selection.startNodeTree.toString(),
-			end_nodetree: selection.endNodeTree.toString(),
-			title: title
-		}
+		var id = this.getAttribute('href').substring(1);
+		// TO-DO: check if pin exists already
 
-		// ????
-		this.bookmarksList.append('<li><a href="#newbookmark" data-startNodeTree="'+dbData.start_nodetree+'" data-endNodeTree"'+dbData.end_nodetree+'" data-startOffset"'+dbData.start_offset+'" data-endOffset"'+dbData.end_offset+'">'+title+'<a></li>')
-		// TO-DO assign onclick event
+		var endPinEl = M.bkmCreation._createBkmEndPin(id);
 
+		var endNodeTree = eval('['+this.getAttribute('data-endNodeTree')+']');
+		var endOffset = parseInt(this.getAttribute('data-endOffset'));
+
+		// mapper module, always end node first not to mess the structure
+		var endNode = M.bkmMapper._findNodeInDOM(endNodeTree, M.bkmCreation.chapterRootNode);
+		M.bkmMapper._insertIntoTextNode(endNode, endPinEl, endOffset);		
+
+		endPinEl.focus();
+	},
+
+	// ============================
+	_clearChapterTextFromPins:function(){
+		// remove all the marks that this script did to a chapter text, so that the tekst positions are correct
+		Y.all('.'+this.bkmStartPinClass+', .'+this.bkmEndPinClass).each(function(bkm){
+			var parent = bkm.get('parentNode').getDOMNode();
+			parent.removeChild(bkm.getDOMNode());
+			parent.normalize();
+		});
+	},
+
+	// ============================
+	_createBkmStartPin:function(bkm_id){
+		var randomID = bkm_id;
+		var newA = document.createElement("a");
+		newA.setAttribute('href', '#'+randomID);
+		newA.setAttribute('id', +randomID);
+		newA.setAttribute('class', this.bkmStartPinClass);
+		newA.innerHTML = '<mark> [ </mark>'; // TO-DO: this could be aria titled into something useful
+
+		// destroy pin on blur
+		newA.onblur = this._bookmarkPinBlur;
+		return newA;
+	},
+
+	// ============================
+	_createBkmEndPin:function(bkm_id){
+		var randomID = bkm_id;
+		var newA = document.createElement("a");
+		newA.setAttribute('href', '#link_'+randomID);
+		newA.setAttribute('id', 'end_'+randomID);
+		newA.setAttribute('class', this.bkmEndPinClass);
+		newA.innerHTML = '<mark> ] </mark>';
+
+		// destroy pin on blur
+		newA.onblur = this._bookmarkPinBlur;
+		return newA;
+	},
+
+	// ============================
+	_bookmarkPinBlur: function(e){
+		var parent = this.parentNode
+		parent.removeChild(this);
+		parent.normalize(); // merge separate text nodes back together
+	},
+
+	// ============================
+	_storeBookmarkToDatabase: function(dbData){
+		// TO-DO: implement loader icon here, use the code from accessibility_block
+		// TO-DO: make better use experience on failure
 		Y.io(this.DB_PATH, {
 			data: dbData,
 			method: 'post',
@@ -248,7 +347,10 @@ accessBookmark:function(bookmark){
 						return range;
 					}
 				}
-				
+
+				// There is also YUI way but doesn't work in IE<11
+				//var editor = new Y.EditorSelection(); editor.anchorTextNode;
+
 				// populate data from Range object
 				selection.startNode = rangeObject.startContainer;
 				selection.endNode = rangeObject.endContainer;
@@ -259,9 +361,10 @@ accessBookmark:function(bookmark){
 			}
 			// FOR IE (this must come last!!)
 			else if (document.selection) { 
-				alert('THIS IS IE')
-				userSelection = document.selection.createRange();
-				alert('????? ERROR: Ovo još nije implementirano')
+				alert(M.util.get_string('browser-unsupported', 'block_accessibility'));
+				// TO-DO: implement this if possible (IE9+ should work anyway)
+				// the closest what works in IE8 = http://stackoverflow.com/questions/1223324/selection-startcontainer-in-ie
+				return null;				
 			}	// else userSelection = document.getSelection(); // no need for this...
 			
 		} 
@@ -269,8 +372,8 @@ accessBookmark:function(bookmark){
 			//alert(' ????? It seems your browser cannot be used for creating user bookmarks. Please use a moderm browser. Error Message: ' + err)
 		}
 
-		// check if selection is within book chapter?
-		// TO-DO M.bkmCreation.chapterRootNode return null;
+		// TO-DO: check if selection is within book chapter?
+		// TO-DO: M.bkmCreation.chapterRootNode return null;
 
 		// populate node types
 		selection.startNodeType = null;
@@ -286,9 +389,11 @@ accessBookmark:function(bookmark){
 	// determine depth of parent elements (specific location path as a node tree of parents)
 	// ============================
 	_calculateNodelistTree: function(node){
+		// node is always text node? It must be...
 		var rootNode = M.bkmCreation.chapterRootNode;
 		var nodeTree = Array();
 		var tempParent = node;
+
 		do{
 			tempChild = tempParent;
 			tempParent = tempParent.parentNode;
@@ -311,10 +416,49 @@ accessBookmark:function(bookmark){
 		
 		//console.log(JSON.stringify(nodeTree))
 		return nodeTree;
-	}
+	},
+
+	// ============================
+	_generateUniqueId: function(length){
+		var ID = M.bkmCreation.ID_PREFIX;
+		var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+		for( var i=0; i < length; i++ )
+		{
+			ID += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+
+		// check if we have generated this key already?
+		if(M.bkmCreation.USED_IDs.indexOf(ID) >= 0) ID = M.bkmCreation._generateUniqueId(length);
+		else M.bkmCreation.USED_IDs.push(ID);
+
+		return ID;
+	}	
 
 
-	
+}
 
 
+//IE <9 support
+if (!Array.prototype.indexOf)
+{
+  Array.prototype.indexOf = function(elt /*, from*/)
+  {
+    var len = this.length >>> 0;
+
+    var from = Number(arguments[1]) || 0;
+    from = (from < 0)
+         ? Math.ceil(from)
+         : Math.floor(from);
+    if (from < 0)
+      from += len;
+
+    for (; from < len; from++)
+    {
+      if (from in this &&
+          this[from] === elt)
+        return from;
+    }
+    return -1;
+  };
 }
