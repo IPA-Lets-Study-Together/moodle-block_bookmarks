@@ -232,6 +232,12 @@ class block_bookmarks extends block_base {
 	}
 
 	public function instance_allow_multiple() { return false; }
-	public function has_config() { return true;} 
+	public function applicable_formats() { return array(
+			'mod-book-view' => true, // allow only in moodle book chapters, and index page for instancing it
+			'site-index' => true,
+			'course-*' => true, // for those who need it
+			'course-index-*' => true // for those who need it
+		);
+	} 
 }
 

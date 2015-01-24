@@ -36,7 +36,44 @@ $PAGE->set_context($context);                                 // 8
 $PAGE->set_url(new moodle_url('/blocks/bookmarks/edit.php'), array('name' => $name));                              // 9
 //$PAGE->set_title(get_string('welcome', 'local_greet'));       // 10
 $PAGE->set_title('hello.');       // 10
+
+
+global $USER;
+global $DB;
+
+
+	$where = array('userid' => $USER->id);
+	$bookmarks =  $DB->get_records('block_bookmarks', $where);
+
+
+$content = '';
+if($bookmarks){
+		foreach ($bookmarks as $bookmark) {
+			$content .= html_writer::start_tag('li');
+			$attrs = array(
+				'href' => '#', // make chaPTER URL heRE
+				'data-id' => $bookmark->id,
+
+			);
+
+// RAZVRSTATI PO NASLOVIMA CHAPTERA!!!
+
+			if($bookmark->title == 'null') $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
+			$content .= html_writer::tag('a', $bookmark->title, $attrs);
+			$content .= html_writer::end_tag('li');
+		}
+	}
+	else{
+		$attrs = array('class' => 'no-bookmarks');
+		$content .= html_writer::tag('li', get_string('no-bookmarks', 'block_bookmarks'), $attrs);
+	}
+
+
+
+
+
 echo $OUTPUT->header();                                       // 11
-echo $OUTPUT->box('box. Return back...');                               // 12
+echo $OUTPUT->box($content. 'box. Return back...');                               // 12
 //echo $OUTPUT->box(get_string('greet', 'local_greet', format_string($name)));                               // 12
 echo $OUTPUT->footer();                                       // 13
+

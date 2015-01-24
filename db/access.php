@@ -12,7 +12,8 @@ $capabilities = array(
         ),
         'clonepermissionsfrom'  => 'moodle/site:manageblocks'
     ),
-    'block/bookmarks:myaddinstance' => array(
+    /*The block will not be displayed at 'my home'
+    'block/bookmarks:myaddinstance' => array( 
       'riskbitmask'  => RISK_PERSONAL,
       'captype'      => 'read',
       'contextlevel' => CONTEXT_SYSTEM,
@@ -20,5 +21,5 @@ $capabilities = array(
         'user' => CAP_ALLOW,
       ),
       'clonepermissionsfrom' => 'moodle/my:manageblocks'
-    ),
+    ),*/
 );

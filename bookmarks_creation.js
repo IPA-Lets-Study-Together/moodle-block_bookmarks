@@ -48,7 +48,7 @@ M.bkmCreation = {
 		this.bookmarkTitleLabel = Y.one('.bookmarkTitleLabel');
 		this.bookmarksList = Y.one('.bookmarks_listing ul');
 
-		// TO-DO: Check if block is displyed within moodle book chapter
+		// TO-DO: Check if block is displyed within moodle book chapter (check context) - 'site-index' is also allowed for this block to be displayed
 		// TO-DO: check for # hash mark within URL to focus desired bookmark directly on load
 		// IMPORTANT: There should be only one block instance on the page since all the buttons are related to a single block
 
