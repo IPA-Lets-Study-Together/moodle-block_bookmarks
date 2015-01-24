@@ -196,6 +196,8 @@ class block_bookmarks extends block_base {
 		// ====== warning wrapper - test phase message
 		$content .= $this->generate_warning('alert alert-danger test-message', 'test-phase-note');
 
+		// TO-DO: give a warning (bookmarks cannot be created here) is block is displayed outside of moodle book context (for example at site-index page)
+
 
 		$this->content->text = $content;
 		return $this->content;

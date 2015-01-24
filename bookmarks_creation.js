@@ -144,7 +144,6 @@ M.bkmCreation = {
 		var title = null;
 		var titleVal = this.fld_bookmarkTitle.get('value');
 		if(titleVal) title = titleVal;
-		else title = M.util.get_string('untitled-bkm-item', 'bookmarks');
 		var dbData = {
 			op: 'insert',
 			start_offset: this.currentSelection.startOffset,
@@ -170,6 +169,7 @@ M.bkmCreation = {
 		newA.setAttribute('href', '#'+randomID);
 		newA.setAttribute('id', 'link_'+ randomID);
 		newA.setAttribute('class', this.bkmLinkClass);
+		if(!title) title = M.util.get_string('untitled-bkm-item', 'block_bookmarks');
 		newA.innerHTML = title;
 		Y.one(newA).on('click', this.accessBookmark);
 		newLI.appendChild(newA);
