@@ -37,6 +37,8 @@ class block_bookmarks extends block_base {
 		// language strings to pass to module.js
 		$this->page->requires->string_for_js('untitled-bkm-item', 'block_bookmarks');
 		$this->page->requires->string_for_js('browser-unsupported', 'block_bookmarks');
+		$this->page->requires->string_for_js('aria-start-pin', 'block_bookmarks');
+		$this->page->requires->string_for_js('aria-end-pin', 'block_bookmarks');
 		$jscreation_data = array(
 			'bookmark_creation_key' => self::KEY_CODE // // e.keyCode
 		); 
@@ -138,6 +140,7 @@ class block_bookmarks extends block_base {
 					$attrs = array(
 						'class' => 'fld_bookmarkTitle', 
 						'type' => 'text',
+						'maxlength' => 50, // database limitation
 						'placeholder' => get_string('enter-title', 'block_bookmarks')
 					);
 					$content .= html_writer::empty_tag('input', $attrs);
@@ -168,7 +171,7 @@ class block_bookmarks extends block_base {
 			// TO-DO: what happens on failure? What status does user get?
 
 			// ====== bookmark creation instructions
-			// TO-DO: Make interactive live instructions, change the step instructions for each user action (now do this, now do that...)
+			// TO-DO: Make interactive live instructions, change the step instructions for each user action (now do this, now do that...) and warnings such as: you have to select the text within the chapter, not ouside
 			$content .= html_writer::tag('div', get_string('creation-instructions', 'block_bookmarks'));
 		$content .= html_writer::end_tag('div');
 		
@@ -180,37 +183,18 @@ class block_bookmarks extends block_base {
 			NOTES
 
 		*****************************/
-		// ====== warning wrapper - test phase message
 		$content .= html_writer::empty_tag('br');
-		$attrs = array('class' => 'alert alert-danger test-message', 'role' => 'alert');
-		$content .= html_writer::start_tag('div', $attrs);
-			// ====== glyphicon
-			$attrs = array('class' => 'glyphicon glyphicon-exclamation-sign', 'aria-hidden' => 'true');
-			$content .= html_writer::tag('span', '', $attrs);
-			// ====== sr only message
-			$attrs = array('class' => 'sr-only');
-			$content .= html_writer::tag('span', get_string('sr-note', 'block_bookmarks'), $attrs);
-			$content .= html_writer::empty_tag('br');
-			// ====== message
-			$content .= html_writer::tag('span', get_string('test-phase-note', 'block_bookmarks'), $attrs);
-		$content .= html_writer::end_tag('div');
 
+		// ====== warning wrapper - Javascript is not enabled
+		$content .= html_writer::start_tag('noscript');
+			$content .= $this->generate_warning('alert alert-danger no-js-message', 'no-js');
+		$content .= html_writer::end_tag('noscript');
 
-		// ====== warning wrapper - browser unsupported
-		$attrs = array('class' => 'alert alert-danger browser-unsupported-message', 'role' => 'alert');
-		$content .= html_writer::start_tag('div', $attrs);
-			// ====== glyphicon
-			$attrs = array('class' => 'glyphicon glyphicon-exclamation-sign', 'aria-hidden' => 'true');
-			$content .= html_writer::tag('span', '', $attrs);
-			// ====== sr only message
-			$attrs = array('class' => 'sr-only');
-			$content .= html_writer::tag('span', get_string('sr-note', 'block_bookmarks'), $attrs);
-			$content .= html_writer::empty_tag('br');
-			// ====== message
-			$content .= html_writer::tag('span', get_string('browser-unsupported', 'block_bookmarks'), $attrs);
-		$content .= html_writer::end_tag('div');
+		// ====== warning wrapper - test phase message
+		$content .= $this->generate_warning('alert alert-danger browser-unsupported-message', 'browser-unsupported');
 
-
+		// ====== warning wrapper - test phase message
+		$content .= $this->generate_warning('alert alert-danger test-message', 'test-phase-note');
 
 
 		$this->content->text = $content;
@@ -228,6 +212,23 @@ class block_bookmarks extends block_base {
 		}
 		else return null;
 		
+	}
+
+	private function generate_warning($class, $text_lang_key){
+		$attrs = array('class' => $class, 'role' => 'alert');
+		$content = html_writer::start_tag('div', $attrs);
+			// ====== glyphicon
+			$attrs = array('class' => 'glyphicon glyphicon-exclamation-sign', 'aria-hidden' => 'true');
+			$content .= html_writer::tag('span', '', $attrs);
+			// ====== sr only message
+			$attrs = array('class' => 'sr-only');
+			$content .= html_writer::tag('span', get_string('sr-note', 'block_bookmarks'), $attrs);
+			$content .= html_writer::empty_tag('br');
+			// ====== message
+			$content .= html_writer::tag('span', get_string($text_lang_key, 'block_bookmarks'), $attrs);
+		$content .= html_writer::end_tag('div');
+
+		return $content;
 	}
 
 	public function instance_allow_multiple() { return false; }

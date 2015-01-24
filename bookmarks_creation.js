@@ -2,11 +2,11 @@
 
 	HOW IT WORKS:
 	CREATING BOOKMARKS:
-	1. select the text he wants to create a bookmark for
-	2. press ctrl+shift+space to begin bookmark creation process, the bookmark title input form appear
-	3. enter a title and submit a form pressing enter key. leaving a form or pressing esc aborts the action
-	4. the bookmark is now created, the focus sould be on the link that can switch a focus back to a chapter text
-	5. using the link, return to a chapter and continue to read the text. The links will be deleted not to mess the chapter structure
+	1. A user selects a fragment of Moodle Book chapter text to create a bookmark from
+	2. The selection has focus. The Bookmark creation process will be triggered by pressing Ctrl+Shift+Space key combination
+	3. The bookmark title textbox gets visible and focused
+	4. A user inputs the bookmark title into the textbox. Pressing ENTER creates bookmark (Pressing ESC or leaving the textbox field aborts bookmark creation process)
+	5. Bookmark is created. Status message gets the focus (status message is "return to chapter" link). Press ENTER to jump back to the chapter
 
 	USING BOOKMARKS:
 	1. use one of the already created bookmars from the block
@@ -92,7 +92,7 @@ M.bkmCreation = {
 			var randomID = M.bkmCreation._generateUniqueId(M.bkmCreation.ID_ATTR_LENGTH);
 			bkm.setAttribute('href', '#'+randomID);
 			bkm.setAttribute('id', 'link_'+ randomID);
-			bkm.setAttribute('class', this.bkmLinkClass);
+			bkm.setAttribute('class', M.bkmCreation.bkmLinkClass);
 			bkm.on('click', M.bkmCreation.accessBookmark);
 		});
 		// kao live u jQuery
@@ -103,7 +103,7 @@ M.bkmCreation = {
 
 
 		// Check if this browser is supported
-		if (typeof window.getSelection == 'function') 
+		if (typeof window.getSelection !== "undefined") 
 			Y.all('.browser-unsupported-message').hide();
 
 
@@ -144,7 +144,7 @@ M.bkmCreation = {
 		var title = null;
 		var titleVal = this.fld_bookmarkTitle.get('value');
 		if(titleVal) title = titleVal;
-		else title = M.util.get_string('untitled-bkm-item', 'block_accessibility');
+		else title = M.util.get_string('untitled-bkm-item', 'bookmarks');
 		var dbData = {
 			op: 'insert',
 			start_offset: this.currentSelection.startOffset,
@@ -183,6 +183,7 @@ M.bkmCreation = {
 		this.btn_backToChapter.setAttribute('data-endOffset', dbData.end_offset);
 		this.btn_backToChapter.setAttribute('href', '#'+randomID);
 		this.btn_backToChapter.setStyle('display','block'); // show() doesn't work
+		this.btn_backToChapter.on('blur', function(){ Y.one(this).hide(); })
 		this.btn_backToChapter.focus();
 
 		// on bkm title text box blur, the abortBookmarkCreation will be triggerd and form will be reset 
@@ -204,9 +205,10 @@ M.bkmCreation = {
 
 
 		var id = this.getAttribute('href').substring(1);
+		var name = this.get('innerHTML');
 		// TO-DO: check if pin exists already
 
-		var startPinEl = M.bkmCreation._createBkmStartPin(id);
+		var startPinEl = M.bkmCreation._createBkmStartPin(id, name);
 		var endPinEl = M.bkmCreation._createBkmEndPin(id);
 
 		var startNodeTree = eval('['+this.getAttribute('data-startNodeTree')+']');
@@ -220,6 +222,7 @@ M.bkmCreation = {
 		var startNode = M.bkmMapper._findNodeInDOM(startNodeTree, M.bkmCreation.chapterRootNode);
 		M.bkmMapper._insertIntoTextNode(startNode, startPinEl, startOffset);
 
+		// TO-DO: scroll a little bit more behind navbar
 		startPinEl.focus();
 		return false;
 
@@ -256,13 +259,14 @@ M.bkmCreation = {
 	},
 
 	// ============================
-	_createBkmStartPin:function(bkm_id){
+	_createBkmStartPin:function(bkm_id, bkm_name){
 		var randomID = bkm_id;
 		var newA = document.createElement("a");
 		newA.setAttribute('href', '#'+randomID);
-		newA.setAttribute('id', +randomID);
+		newA.setAttribute('id', randomID);
 		newA.setAttribute('class', this.bkmStartPinClass);
-		newA.innerHTML = '<mark> [ </mark>'; // TO-DO: this could be aria titled into something useful
+		newA.setAttribute('aria-label', M.util.get_string('aria-start-pin', 'block_bookmarks') + ' ' + bkm_name);
+		newA.innerHTML = '<mark aria-hidden="true"> [ </mark>'; // TO-DO: this could be aria titled into something useful
 
 		// destroy pin on blur
 		newA.onblur = this._bookmarkPinBlur;
@@ -273,10 +277,11 @@ M.bkmCreation = {
 	_createBkmEndPin:function(bkm_id){
 		var randomID = bkm_id;
 		var newA = document.createElement("a");
-		newA.setAttribute('href', '#link_'+randomID);
-		newA.setAttribute('id', 'end_'+randomID);
+		newA.setAttribute('href', '#link_'+ randomID);
+		newA.setAttribute('id', 'end_'+ randomID);
 		newA.setAttribute('class', this.bkmEndPinClass);
-		newA.innerHTML = '<mark> ] </mark>';
+		newA.setAttribute('aria-label', M.util.get_string('aria-end-pin', 'block_bookmarks'));
+		newA.innerHTML = '<mark aria-hidden="true"> ] </mark>';
 
 		// destroy pin on blur
 		newA.onblur = this._bookmarkPinBlur;
@@ -301,14 +306,16 @@ M.bkmCreation = {
 				success: function(id, o) {
 					//debugger;
 					//alert('SUCCESS')
-					//M.block_accessibility.show_message(M.util.get_string('saved', 'block_accessibility'));
-					//setTimeout("M.block_accessibility.show_message('')", 5000);
+					//M.block_bookmarks.show_message(M.util.get_string('saved', 'block_bookmarks'));
+					//setTimeout("M.block_bookmarks.show_message('')", 5000);
 				},
 				failure: function(id, o) {
+					// TO-DO: back to chapter link should be updated with failure message
+					Y.one('.block_bookmarks').setStyle('background', 'red'); // just fyi
 					alert('FAILED')
-					//alert(M.util.get_string('jsnosave', 'block_accessibility')+' '+o.status+' '+o.statusText);
+					//alert(M.util.get_string('jsnosave', 'block_bookmarks')+' '+o.status+' '+o.statusText);
 				},
-				//start: M.block_accessibility.show_loading
+				//start: M.block_bookmarks.show_loading
 			}
 		});
 	},
@@ -333,21 +340,11 @@ M.bkmCreation = {
 		try {
 			// FOR MODERN BROWSERS
 			if (window.getSelection) { 
-				var userSelection = document.getSelection();
+				var userSelection = document.getSelection(); // why not window.getSelection()??? bug? It works anyway...
 				
 				// conversion: We need Range object, NOT Selection object
-				var rangeObject = getRangeObject(userSelection);
-				function getRangeObject(selectionObject) {
-					if (selectionObject.getRangeAt)
-						return selectionObject.getRangeAt(0);
-					else { // Safari!
-						var range = document.createRange();
-						range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
-						range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
-						return range;
-					}
-				}
-
+				var rangeObject = M.bkmCreation._getRangeObject(userSelection);
+				
 				// There is also YUI way but doesn't work in IE<11
 				//var editor = new Y.EditorSelection(); editor.anchorTextNode;
 
@@ -361,7 +358,7 @@ M.bkmCreation = {
 			}
 			// FOR IE (this must come last!!)
 			else if (document.selection) { 
-				alert(M.util.get_string('browser-unsupported', 'block_accessibility'));
+				alert(M.util.get_string('browser-unsupported', 'block_bookmarks'));
 				// TO-DO: implement this if possible (IE9+ should work anyway)
 				// the closest what works in IE8 = http://stackoverflow.com/questions/1223324/selection-startcontainer-in-ie
 				return null;				
@@ -369,6 +366,8 @@ M.bkmCreation = {
 			
 		} 
 		catch (err) {
+			//alert(err)
+			Y.one('.block_bookmarks').setStyle('background', 'red'); // just fyi
 			//alert(' ????? It seems your browser cannot be used for creating user bookmarks. Please use a moderm browser. Error Message: ' + err)
 		}
 
@@ -385,6 +384,20 @@ M.bkmCreation = {
 
 		return selection;
 	},
+
+
+	// ============================
+	_getRangeObject: function (selectionObject) {
+		if (selectionObject.getRangeAt)
+			return selectionObject.getRangeAt(0);
+		else { // Safari!
+			var range = document.createRange();
+			range.setStart(selectionObject.anchorNode,selectionObject.anchorOffset);
+			range.setEnd(selectionObject.focusNode,selectionObject.focusOffset);
+			return range;
+		}
+	},
+
 
 	// determine depth of parent elements (specific location path as a node tree of parents)
 	// ============================
