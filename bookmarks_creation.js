@@ -9,10 +9,11 @@
 	5. Bookmark is created. Status message gets the focus (status message is "return to chapter" link). Press ENTER to jump back to the chapter
 
 	USING BOOKMARKS:
-	1. use one of the already created bookmars from the block
-	2. accessing the bookmark will create links to the start and the end of a bookmark within the chapter in real time. Focus will be switched to the beginning
-	3. start link will be deleted once it lose the focus not to mess the chapter structure, end link remains
-	4. while end link is reached, user can access it to return to a bookmarks list. Once it loses the focus it will also be deleted
+	1. A user access desired bookmark from the bookmarks list to jump to the relevant part of the text
+	2. Javascript parse given data "on-the fly" to create pins where the bookmark should appear within the chapter text
+	3. Starting pin of the bookmark gets focused. A user continues to read the chapter text
+	4. Ending pin is reached and focused
+	5. If ending pin was accessed? Previously used item of a list of all bookmarks gets the focus. Otherwise, starting and ending pin are being cleared. A user continues to read the chapter text
 
 
 
@@ -35,6 +36,8 @@ M.bkmCreation = {
 	ID_ATTR_LENGTH : 10, // generated id attribute length + ID_PREFIX part
 
 	DB_PATH: M.cfg.wwwroot+'/blocks/bookmarks/dbaccess.php',
+
+	transactionsCount: 0, // AJAX transactions (for loader icon)
 
 	init: function(Y, bookmark_creation_key) {
 		// CACHE
@@ -312,10 +315,11 @@ M.bkmCreation = {
 				failure: function(id, o) {
 					// TO-DO: back to chapter link should be updated with failure message
 					Y.one('.block_bookmarks').setStyle('background', 'red'); // just fyi
-					alert('FAILED')
+					alert('FAILED! Please contact the administrator. You refresh refresh a page now.')
 					//alert(M.util.get_string('jsnosave', 'block_bookmarks')+' '+o.status+' '+o.statusText);
 				},
-				//start: M.block_bookmarks.show_loading
+				start: this.show_loading,
+				end: this.hide_loading
 			}
 		});
 	},
@@ -446,7 +450,22 @@ M.bkmCreation = {
 		else M.bkmCreation.USED_IDs.push(ID);
 
 		return ID;
-	}	
+	}	,
+
+	show_loading: function(){
+		this.transactionsCount++;
+		Y.one('.loader-icon').setStyle('display', 'block');
+		Y.one('.block_bookmarks .content').setStyle('opacity', '0.2');	
+	},
+	hide_loading: function(){
+		if(this.transactionsCount < 0) this.transactionsCount--;
+		else this.transactionsCount = 0; // prevention if count would end up to less than 0
+
+		if(this.transactionsCount == 0){
+			Y.one('.loader-icon').setStyle('display', 'none');
+			Y.one('.block_bookmarks .content').setStyle('opacity', '1');	
+		}
+	},
 
 
 }

@@ -5,3 +5,17 @@ body.jsdisabled .block_bookmarks {
 .btn_backToChapter{
 	display: none;
 }
+
+.block_bookmarks{
+	position: relative; /* for loader.gif to position absolute */
+}
+
+.loader-icon{
+    position: absolute;
+    width: 54px;
+    height: 55px;
+    top: 42%;
+    left:5em;
+    background: url('[[pix:block_bookmarks|loader]]') !important;
+    display:none;
+}

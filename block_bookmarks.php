@@ -79,7 +79,7 @@ class block_bookmarks extends block_base {
 			$content .= html_writer::start_tag('ul');
 
 				// TO-DO: make one tamplate element here so that JS can use it for its dynamic insertions
-				$bookmarks = $this->get_all_bookmarks();
+				$bookmarks = $this->_get_all_bookmarks();
 				//var_dump($bookmarks);
 
 				// ====== li and a elements
@@ -180,30 +180,41 @@ class block_bookmarks extends block_base {
 
 		/*****************************
 
-			NOTES
+			NOTES / WARNINGS
 
 		*****************************/
 		$content .= html_writer::empty_tag('br');
 
 		// ====== warning wrapper - Javascript is not enabled
 		$content .= html_writer::start_tag('noscript');
-			$content .= $this->generate_warning('alert alert-danger no-js-message', 'no-js');
+			$content .= $this->_generate_warning('alert alert-danger no-js-message', 'no-js');
 		$content .= html_writer::end_tag('noscript');
 
-		// ====== warning wrapper - test phase message
-		$content .= $this->generate_warning('alert alert-danger browser-unsupported-message', 'browser-unsupported');
+		// ====== warning wrapper - unsupported browser message
+		$content .= $this->_generate_warning('alert alert-danger browser-unsupported-message', 'browser-unsupported');
 
-		// ====== warning wrapper - test phase message
-		$content .= $this->generate_warning('alert alert-danger test-message', 'test-phase-note');
+		// ====== warning wrapper - test phase warning
+		$showBetaTestPhase = TRUE; // by default
+		if(isset($this->config->test_warning_enabled)) $showBetaTestPhase = $this->config->test_warning_enabled;
+
+		if($showBetaTestPhase)
+			$content .= $this->_generate_warning('alert alert-danger test-message', 'test-phase-note');
 
 		// TO-DO: give a warning (bookmarks cannot be created here) is block is displayed outside of moodle book context (for example at site-index page)
+
+
+		// ====== loader icon
+		// html_writer::empty_tag('img', array('src' => new moodle_url(self::LOADER_ICON), 'alt' => 'loader icon')); // it doesn't work so it's implemented by CSS
+		$spanattrs = array('class' => 'loader-icon');
+		$content .= html_writer::start_tag('span', $spanattrs);
+		$content .= html_writer::end_tag('span');
 
 
 		$this->content->text = $content;
 		return $this->content;
 	}
 
-	private function get_all_bookmarks(){
+	private function _get_all_bookmarks(){
 		global $USER;
 		global $DB;
 		global $chapter;
@@ -216,7 +227,7 @@ class block_bookmarks extends block_base {
 		
 	}
 
-	private function generate_warning($class, $text_lang_key){
+	private function _generate_warning($class, $text_lang_key){
 		$attrs = array('class' => $class, 'role' => 'alert');
 		$content = html_writer::start_tag('div', $attrs);
 			// ====== glyphicon

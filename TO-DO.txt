@@ -1,0 +1,19 @@
+-----------------------------------------
+TO-DO (advices for future development)
+-----------------------------------------
+- <mark> element could surround user bookmark visually. However this is hard to achieve because the selection might spread through various DOM elements and levels. Any solution? So far only beginning and the end of bookmark is marked visually but hidden from a screen reader
+- Chapter editing problem (serious bug): As bookmarks positions are represented by DOM structure tree (the depth of start and end selection nodes as well as offset within those nodes) if a chapter texts is edited, the bookmarks might lose their original positions. Any idea?
+- Also, if the chapter has recently been updated, maybe there should be a warning to a user that he might lost a meaning of his bookmarks. There are dates in the database that indicates when the chapter was changed and when each bookmark was created so it is easy to determine how many bookmarks is possibly affected
+- Also, maybe it's not a bad idea to store entire bookmark content as well so that user can access this content as well if chapter text was edited?
+- Idea: Keyboard keys that are used for bookmark creation could be set in blocks configuration form
+- Accessibility and user experience must be improved, especially for screen readers. ARIA should be examined more in detail. Aria-live could be used as well. Focus management needs to be tested more in detail
+- If this would be implemented maybe the support for IE8 would be achieved so that blind user who are still using their Windows XP and JAWS can as well access this plugin http://stackoverflow.com/questions/1223324/selection-startcontainer-in-ie
+- Idea: There might be a need to implement additional buttons for a.) capturing selection - this what ctrl+shift+space is doing and b.) creating bookmark - this what enfer does after entering the title
+- Idea: Since all the bookmarks are represented with a random href="#" hash tag, it would be good that this hash tag is actually their id from the database. Then when page loads (onload) and if URL contains this bookmark hash id it could be instantly focused. (it would be only needed to be created first - pins for this bookmark would need to be created within chapter text so that focus could jumpe there)
+- More detailed restrictions needs to be implemented: what happen if you want to create a bookmark outside od chapter context?; what if selection starts within the chapter but ends outside the chapter?; what if user doesn't select anything? error handling; What if database insertion fails?; etc, etc…
+- Security issues? Check out database actions (insertions and deletions)
+- Idea: It would be cool to have live step-by-step instructions (or status). For example first you get "select the text". Once you select the text you get "now press ctrl+shift+space". This could be implemented with aria-live
+- Idea: It would be cool to have a special keyboard combination to access the list of all bookmarks quickly and easily. This is desirable for blind users who use this plugin (e.g. ctrl+shift+backspace?)
+- Maybe it would be cool to have some beep sound if bookmark is created successfully?
+- Bookmarks editing page allows only functionality of bookmark title change or deletion. It would be cool to have bookmarks reordering functionality
+	

@@ -1,28 +1,36 @@
 <?php
 
-// Must have
+// MUST HAVE
 $string['pluginname'] = 'Bookmarks (within book chapter)';
 $string['bookmarks'] = 'Bookmarks'; // block title
 $string['bookmarks:addinstance'] = 'Add a new Bookmarks block';
 $string['bookmarks:myaddinstance'] = 'Add a new Bookmarks block to the My Moodle page';
 
 // LISTING BOOKMARK ITEMS
-$string['untitled-bkm-item'] = 'Oznaka bez naslova';
-$string['user-bookmarks-title'] = 'Korisničke oznake';
-$string['no-bookmarks'] = 'Ne postoje korisničke oznake u ovom poglavlju';
-$string['bookmarks-editor'] = 'Ažuriranje svih korisničkih oznaka';
-$string['aria-start-pin'] = 'Početak oznake'; // beginning of the user bookmark xx
-$string['aria-end-pin'] = 'Kraj oznake. Pritisnite ovdje za povratak na popis oznaka'; // access to jump back to the list
+$string['untitled-bkm-item'] = 'Untitled bookmark';
+$string['user-bookmarks-title'] = 'User bookmarks';
+$string['no-bookmarks'] = 'No user bookmarks exists in this chapter';
+$string['bookmarks-editor'] = 'Bookmarks editor';
+$string['aria-start-pin'] = 'A begining of the bookmark'; // beginning of the user bookmark xx
+$string['aria-end-pin'] = 'The end of the bookmark. Press enter to jump back to the bookmarks list or continue to read the chapter'; // access to jump back to the list
 
 // CREATING BOOKMARK ITEMS
-$string['bookmarks-creation-title'] = 'Unos nove oznake';
-$string['enter-title'] = 'Unesite naziv i pritisnite enter';
-$string['btn-add-bookmark'] = 'Dodaj';
-$string['creation-success'] = 'Korisnička oznaka je kreirana. Pritisnite ovdje za povratak na tekst poglavlja ili nastavite čitati dalje';
-$string['creation-instructions'] = 'Da biste kreirali korisničku oznaku prvo označite željeni tekst poglavlja, zatim pritisnite <strong>Ctrl+Shift+Space</strong>, unesite naziv oznake i pritisnite <strong>Enter</strong>';
+$string['bookmarks-creation-title'] = 'Bookmark creation';
+$string['enter-title'] = 'Enter the title and press enter';
+$string['btn-add-bookmark'] = 'Add';
+$string['creation-success'] = 'User bookmark is created. Press enter to jump back to the chapter';
+$string['creation-instructions'] = 'To create a bookmark select the desired part of the chapter text, press <strong>Ctrl+Shift+Space</strong>, enter the title and press enter <strong>Enter</strong>';
 
 // NOTES AND WARNINGS
-$string['sr-note'] = 'Upozorenje:';
-$string['test-phase-note'] = 'Ovo je testna verzija blocka. Neke funkcionalnosti još nisu implementirane. Ukoliko se poglavlje ažurira postoji mogućnost da se izgubi konzistentnost oznaka. Dodatak radi u Internet Exploreru verzije 9 i više';
-$string['browser-unsupported'] = 'Ovaj web preglednik nije podržan. Molimo Vas da koristite neki morderni web preglednik. Dodatak nije u mogućnosti funkcionirati ispravno';
-$string['no-js'] = 'Javascript u vašem web pregledniku nije omogućen. Molimo Vas da omogućite Javascript ili koristite drugi web preglednik. Dodatak nije u mogućnosti funkcionirati ispravno';
+$string['sr-note'] = 'Warning:';
+$string['test-phase-note'] = 'This is a beta version of a block. Some functionalities might not work proprly. Please keep in mind that chapter text editing might cause user bookmarks to lose their correct positions within the text. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher';
+$string['browser-unsupported'] = 'This browser is not supported. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher';
+$string['no-js'] = 'The Javascript in your web browser is not enabled. Please enable Javascript or use different web browser';
+
+// CONFIGURATION FORM
+$string['config_test_warning_enabled'] = 'Beta version';
+$string['config_test_warning_enabled_checkbox'] = 'Display "beta version" warning';
+$string['config_test_warning_enabled_help'] = $string['test-phase-note'];
+
+// EDITING BOOKMARKS
+$string['editing_page_title'] = $string['bookmarks-editor'];

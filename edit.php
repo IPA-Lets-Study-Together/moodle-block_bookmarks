@@ -1,79 +1,111 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
- * An example of a stand-alone Moodle script.
- *
- * Says Hello, {username}, or Hello {name} if the name is given in the URL.
- *
- * @package   local_greet
- * @copyright 2014 Tim Hunt
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-require_once(dirname(__FILE__) . '/../../config.php');        // 1
-require_login();                                              // 2
-$context = context_system::instance();                        // 3
-//require_capability('local/greet:begreeted', $context);        // 4
-$name = optional_param('name', '', PARAM_TEXT);               // 5
-if (!$name) {
-    //$name = fullname($USER);                                  // 6
-    $name = fullname('hrvoje');                                  // 6
-}
-//add_to_log(SITEID, 'local_greet', 'begreeted','local/greet/index.php?name=' . urlencode($name));    // 7
-$PAGE->set_context($context);                                 // 8
-$PAGE->set_url(new moodle_url('/blocks/bookmarks/edit.php'), array('name' => $name));                              // 9
-//$PAGE->set_title(get_string('welcome', 'local_greet'));       // 10
-$PAGE->set_title('hello.');       // 10
 
+// TO-DO: Improve user experience!!
+
+
+require_once(dirname(__FILE__) . '/../../config.php');
+require_login(); 
+//require_capability('local/greet:begreeted', $context); 
 
 global $USER;
 global $DB;
 
+// page preparation
+$context = context_system::instance();
+$PAGE->set_context($context); 
+$PAGE->set_url(new moodle_url('/blocks/bookmarks/edit.php'));
+$PAGE->set_title(get_string('bookmarks-editor', 'block_bookmarks'));
+// TO-DO: set some other page type?
 
-	$where = array('userid' => $USER->id);
-	$bookmarks =  $DB->get_records('block_bookmarks', $where);
+
+$params['op'] = 'delete';
+$db_url = new moodle_url('/blocks/bookmarks/dbaccess.php', $params);
+
 
 
 $content = '';
+
+
+// load bookmarks
+$where = array('userid' => $USER->id);
+$temp_chapterid = -1;
+$bookmarks =  $DB->get_records('block_bookmarks', $where, 'chapterid');
 if($bookmarks){
-		foreach ($bookmarks as $bookmark) {
-			$content .= html_writer::start_tag('li');
-			$attrs = array(
-				'href' => '#', // make chaPTER URL heRE
-				'data-id' => $bookmark->id,
-
-			);
-
-// RAZVRSTATI PO NASLOVIMA CHAPTERA!!!
-
-			if($bookmark->title == 'null') $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
-			$content .= html_writer::tag('a', $bookmark->title, $attrs);
-			$content .= html_writer::end_tag('li');
+	foreach ($bookmarks as $bookmark) {
+		// sort bookmarks from their chapters
+		if($bookmark->chapterid !== $temp_chapterid){
+			if ($temp_chapterid !== -1) $content .= html_writer::end_tag('ul'); // the last ending <ul> tag is added after for loop
+			$content .= html_writer::tag('h1', 'Chapter id #'.$bookmark->chapterid);
+			$content .= html_writer::start_tag('ul');
+			$temp_chapterid = $bookmark->chapterid;
 		}
+
+		// create bookmark item
+		$content .= html_writer::start_tag('li');
+		$attrs = array(
+			'href' => '#',
+			'data-id' => $bookmark->id,
+		);
+
+		if($bookmark->title == 'null') $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
+		$content .= html_writer::tag('a', $bookmark->title, $attrs);
+
+
+
+
+
+		$attrs = array('action' => $db_url->out(false), 'method' => 'POST');
+		$content .= html_writer::start_tag('form', $attrs);
+		
+			$attrs = array(
+				'type' => 'submit',
+				'value' => 'Remove bookmark' //get_string('btn-add-bookmark', 'block_bookmarks')
+			);
+			$content .= html_writer::empty_tag('input', $attrs);
+
+			$attrs = array(
+				'type' => 'hidden',
+				'name' => 'id',
+				'value' => $bookmark->id
+			);
+			$content .= html_writer::empty_tag('input', $attrs);
+
+		$content .= html_writer::end_tag('form');
+		
+
+
+
+
+
+
+
+
+
+
+		// TO-DO: edit title
+
+
+
+
+
+
+		$content .= html_writer::end_tag('li');
 	}
-	else{
-		$attrs = array('class' => 'no-bookmarks');
-		$content .= html_writer::tag('li', get_string('no-bookmarks', 'block_bookmarks'), $attrs);
-	}
+	$content .= html_writer::end_tag('ul'); // ending ul tag
+}
+else
+{
+	$attrs = array('class' => 'no-bookmarks');
+	$content .= html_writer::tag('li', get_string('no-bookmarks', 'block_bookmarks'), $attrs);
+}
+
+// TO-DO: depending on witch chapter it was accessed for, jump with # link to specific bookmarks...
+// TO-DO: Create a link to get back to a chapter that user came from (check accessibility block functionalities for example)
+// TO-DO: include separate JS file. You must ask a user if he is sure to remove the bookmark
 
 
-
-
-
-echo $OUTPUT->header();                                       // 11
-echo $OUTPUT->box($content. 'box. Return back...');                               // 12
-//echo $OUTPUT->box(get_string('greet', 'local_greet', format_string($name)));                               // 12
-echo $OUTPUT->footer();                                       // 13
+// output
+echo $OUTPUT->header();
+echo $OUTPUT->box($content);
+echo $OUTPUT->footer();
 
