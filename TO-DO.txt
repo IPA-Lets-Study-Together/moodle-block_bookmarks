@@ -10,10 +10,11 @@ TO-DO (advices for future development)
 - If this would be implemented maybe the support for IE8 would be achieved so that blind user who are still using their Windows XP and JAWS can as well access this plugin http://stackoverflow.com/questions/1223324/selection-startcontainer-in-ie
 - Idea: There might be a need to implement additional buttons for a.) capturing selection - this what ctrl+shift+space is doing and b.) creating bookmark - this what enfer does after entering the title
 - Idea: Since all the bookmarks are represented with a random href="#" hash tag, it would be good that this hash tag is actually their id from the database. Then when page loads (onload) and if URL contains this bookmark hash id it could be instantly focused. (it would be only needed to be created first - pins for this bookmark would need to be created within chapter text so that focus could jumpe there)
-- More detailed restrictions needs to be implemented: what happen if you want to create a bookmark outside od chapter context?; what if selection starts within the chapter but ends outside the chapter?; what if user doesn't select anything? error handling; What if database insertion fails?; etc, etc…
+- More detailed restrictions needs to be implemented: what happen if you want to create a bookmark outside od chapter context?; what if selection starts within the chapter but ends outside the chapter?; what if user doesn't select anything? error handling; What if database insertion fails?; What if you try to create a bookmark when bookmark pin is selected? etc, etc…
 - Security issues? Check out database actions (insertions and deletions)
 - Idea: It would be cool to have live step-by-step instructions (or status). For example first you get "select the text". Once you select the text you get "now press ctrl+shift+space". This could be implemented with aria-live
 - Idea: It would be cool to have a special keyboard combination to access the list of all bookmarks quickly and easily. This is desirable for blind users who use this plugin (e.g. ctrl+shift+backspace?)
 - Maybe it would be cool to have some beep sound if bookmark is created successfully?
 - Bookmarks editing page allows only functionality of bookmark title change or deletion. It would be cool to have bookmarks reordering functionality
+- edit.php script needs some more work. So far only the basic functionality has been implemented. Please read TO-DO comments in the code 
 	
