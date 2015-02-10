@@ -29,6 +29,8 @@ switch ($op) {
 		$db_data['date'] = time(); // UNIX timestamp
 		echo ($DB->insert_record('block_bookmarks', $db_data));
 
+		break;
+
 	case 'delete':
 		
 		$id = required_param('id', PARAM_TEXT);
@@ -38,9 +40,22 @@ switch ($op) {
 		//if (!accessibility_is_ajax()) {
             redirect($redirecturl->out(false));
 
+        break;
+
 
 	case 'rename':
-		// TO-DO
+		$id = required_param('id', PARAM_TEXT);
+		$title = required_param('title', PARAM_TEXT);
+		$data = array(
+			'id' => $id,
+			'title' => $title
+		);
+
+		echo ($DB->update_record('block_bookmarks', $data));
+
+		//if (!accessibility_is_ajax()) {
+            redirect($redirecturl->out(false));
+
 
 	
 	
