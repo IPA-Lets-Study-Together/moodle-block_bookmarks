@@ -15,6 +15,7 @@ class block_bookmarks extends block_base {
 	}
 
 	// public function specialization(){} // called after init()
+	/* Initial idea was to transfer chapterid with the session for security reason. This however might cause that you create bookmark in another chapter if you have loaded two chapter pages in the same time becuase this another one will overwrite session variable
 	public function specialization() {
 
 		global $SESSION;
@@ -23,24 +24,65 @@ class block_bookmarks extends block_base {
 		// store chapterid so that ajax can access it while inserting bookmark to db
 		if(isset($chapter->id))	$SESSION->chapterid = $chapter->id;
 		else unset($SESSION->chapterid);
-	}
+	}*/
 
 	public function get_content()
 	{
+		global $chapter;
+
 		if ($this->content !== null) {
 		  return $this->content;
 		}
+		
 		$this->content = new stdClass;
+		$content = '';
 
-		// INCLUDE JS AND PASS PARAMETERS
-		// ===============================================
+
+		/*****************************
+
+			 if not in moodle book chapter context, don't show anything
+
+		*****************************/
+		if(!isset($chapter)){
+			// ====== display instructions for positioning a block by the side of Moodle Book Chapter
+
+			$attrs = array('class' => 'alert alert-danger', 'role' => 'alert');
+			$content = html_writer::start_tag('div', $attrs);
+				// ====== glyphicon
+				$attrs = array('class' => 'glyphicon glyphicon-exclamation-sign', 'aria-hidden' => 'true');
+				$content .= html_writer::tag('span', '', $attrs);
+				// ====== sr only message
+				$attrs = array('class' => 'sr-only');
+				$content .= html_writer::tag('span', get_string('sr-note', 'block_bookmarks'), $attrs);
+				$content .= html_writer::empty_tag('br');
+				// ====== message
+				$content .= html_writer::tag('p', 'This block works only with Moodle Book chapter. You can create an instance of a block in each Moodle Book chapter view where you need it. To include a block globally across all Moodle Book chapter views please follow this instructions:');
+				$content .= html_writer::start_tag('ol');
+					$content .= html_writer::tag('li', 'Go to Moodle homepage. Create a block instance to the Moodle homepage and set the configuration for the block to be visible in any page throughout entire Moodle');
+					$content .= html_writer::tag('li', 'Go to any Moodle Book chapter page. Access the configuration again and restrict the block to be visible only on Moodle Book type of pages');
+				$content .= html_writer::end_tag('ol');
+			$content .= html_writer::end_tag('div');
+
+
+			$this->content->text = $content;
+			return $this->content;
+		}
+		
+
+
+		/*****************************
+
+			INCLUDE JS AND PASS PARAMETERS
+
+		*****************************/
 		// language strings to pass to module.js
 		$this->page->requires->string_for_js('untitled-bkm-item', 'block_bookmarks');
 		$this->page->requires->string_for_js('browser-unsupported', 'block_bookmarks');
 		$this->page->requires->string_for_js('aria-start-pin', 'block_bookmarks');
 		$this->page->requires->string_for_js('aria-end-pin', 'block_bookmarks');
 		$jscreation_data = array(
-			'bookmark_creation_key' => self::KEY_CODE // // e.keyCode
+			'bookmark_creation_key' => self::KEY_CODE, // e.keyCode
+			'chapterid' => $chapter->id
 		); 
 		$jscreation_module = array(
 			'name'  =>  'block_bookmarks_creation',
@@ -61,8 +103,6 @@ class block_bookmarks extends block_base {
 		$this->page->requires->js_init_call('M.bkmMapper.init', $jsmapper_data, false, $jsmapper_module);
 
 
-
-		$content = '';
 		/*****************************
 
 			BOOKMARK LISTING PART
@@ -94,7 +134,7 @@ class block_bookmarks extends block_base {
 							'data-startOffset' => $bookmark->start_offset,
 							'data-endOffset' => $bookmark->end_offset
 						);
-						if($bookmark->title == 'null') $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
+						if($bookmark->title == null) $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
 						$content .= html_writer::tag('a', $bookmark->title, $attrs);
 						$content .= html_writer::end_tag('li');
 					}
@@ -238,7 +278,7 @@ class block_bookmarks extends block_base {
 			$content .= html_writer::tag('span', get_string('sr-note', 'block_bookmarks'), $attrs);
 			$content .= html_writer::empty_tag('br');
 			// ====== message
-			$content .= html_writer::tag('span', get_string($text_lang_key, 'block_bookmarks'), $attrs);
+			$content .= html_writer::tag('span', get_string($text_lang_key, 'block_bookmarks'));
 		$content .= html_writer::end_tag('div');
 
 		return $content;

@@ -19,10 +19,10 @@ $PAGE->set_title(get_string('editing_page_title', 'block_bookmarks'));
 
 
 $params['op'] = 'delete';
-$db_delete_url = new moodle_url('/blocks/bookmarks/dbaccess.php', $params);
+$db_delete_url = new moodle_url('/blocks/bookmarks/modifybookmarks.php', $params);
 
 $params['op'] = 'rename';
-$db_rename_url = new moodle_url('/blocks/bookmarks/dbaccess.php', $params);
+$db_rename_url = new moodle_url('/blocks/bookmarks/modifybookmarks.php', $params);
 
 
 
@@ -55,7 +55,7 @@ if($bookmarks){
 			'data-id' => $bookmark->id,
 		);
 
-		if($bookmark->title == 'null') $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
+		if($bookmark->title == null) $bookmark->title = get_string('untitled-bkm-item', 'block_bookmarks');
 		$content .= html_writer::tag('a', $bookmark->title, $attrs);
 
 
@@ -72,6 +72,13 @@ if($bookmarks){
 				'type' => 'hidden',
 				'name' => 'id',
 				'value' => $bookmark->id
+			);
+			$content .= html_writer::empty_tag('input', $attrs);
+
+			$attrs = array(
+				'type' => 'hidden',
+				'name' => 'sesskey',
+				'value' => sesskey()
 			);
 			$content .= html_writer::empty_tag('input', $attrs);
 
@@ -114,6 +121,13 @@ if($bookmarks){
 				'type' => 'hidden',
 				'name' => 'id',
 				'value' => $bookmark->id
+			);
+			$content .= html_writer::empty_tag('input', $attrs);
+
+			$attrs = array(
+				'type' => 'hidden',
+				'name' => 'sesskey',
+				'value' => sesskey()
 			);
 			$content .= html_writer::empty_tag('input', $attrs);
 

@@ -35,14 +35,16 @@ M.bkmCreation = {
 	USED_IDs : new Array(),
 	ID_ATTR_LENGTH : 10, // generated id attribute length + ID_PREFIX part
 
-	DB_PATH: M.cfg.wwwroot+'/blocks/bookmarks/dbaccess.php',
+	DB_PATH: M.cfg.wwwroot+'/blocks/bookmarks/modifybookmarks.ajax.php',
 
+	chapterid: null,
 	transactionsCount: 0, // AJAX transactions (for loader icon)
 
-	init: function(Y, bookmark_creation_key) {
+	init: function(Y, bookmark_creation_key, chapterid) {
 		// CACHE
 		// ==================================================================
 		this.Y = Y;
+		this.chapterid = chapterid;
 		this.btn_backToChapter = Y.one('.btn_backToChapter');
 		this.btn_insertBookmark = Y.one('.btn_insertBookmark');
 		//this.btn_storeSelection = Y.one('.btn_storeSelection'); // this button is removed
@@ -144,11 +146,13 @@ M.bkmCreation = {
 		if(!this.currentSelection) return false;
 
 		// store bookmark to database
-		var title = null;
+		var title = '';
 		var titleVal = this.fld_bookmarkTitle.get('value');
 		if(titleVal) title = titleVal;
 		var dbData = {
 			op: 'insert',
+			sesskey: M.cfg.sesskey,
+			chapterid: this.chapterid,
 			start_offset: this.currentSelection.startOffset,
 			end_offset: this.currentSelection.endOffset,
 			start_nodetree: this.currentSelection.startNodeTree.toString(),

@@ -23,7 +23,7 @@ $string['creation-instructions'] = 'To create a bookmark select the desired part
 
 // NOTES AND WARNINGS
 $string['sr-note'] = 'Warning:';
-$string['test-phase-note'] = 'This is a beta version of a block. Some functionalities might not work proprly. Please keep in mind that chapter text editing might cause user bookmarks to lose their correct positions within the text. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher';
+$string['test-phase-note'] = 'This is a beta version of a block. Some functionality might not work properly. Please keep in mind that chapter text editing might cause user bookmarks to lose their correct positions within the text. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher';
 $string['browser-unsupported'] = 'This browser is not supported. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher';
 $string['no-js'] = 'The Javascript in your web browser is not enabled. Please enable Javascript or use different web browser';
 
