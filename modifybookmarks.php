@@ -1,4 +1,27 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ 
+/**
+ * This file is used for database access
+ *
+ * @package    block_bookmarks
+ * @copyright  Copyright 2013 onwards University of Split, Faculty of Economics 
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 require_once('../../config.php');
 //require_once($CFG->dirroot.'/blocks/accessibility/lib.php');
 require_login();
@@ -21,6 +44,7 @@ switch ($op) {
 	case 'delete':
 		
 		// TO-DO: maybe not to remove it completely but mark it "not to show anymore" ?
+		// TO-DO: verify if the entry has been removed, echo will always return true
 		echo ($DB->delete_records('block_bookmarks', array('id' => $id)));
 		redirect($redirecturl->out(false));
 
@@ -36,6 +60,7 @@ switch ($op) {
 			'title' => $title
 		);
 
+		// TO-DO: verify if the entry has been renamed ? or...
 		echo ($DB->update_record('block_bookmarks', $data));
 		redirect($redirecturl->out(false));
 

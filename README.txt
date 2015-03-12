@@ -19,4 +19,6 @@ Code developers:
 -----------------------------------------
 Licence:
 -----------------------------------------
-Released Under the GNU General Public Licence http://www.gnu.org/copyleft/gpl.html
+Released Under the GNU General Public Licence 
+http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+Copyright 2013 onwards University of Split, Faculty of Economics 

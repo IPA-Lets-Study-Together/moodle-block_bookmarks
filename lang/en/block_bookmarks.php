@@ -1,4 +1,24 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+ 
+/**
+ * @package    block_bookmarks
+ * @copyright  Copyright 2013 onwards University of Split, Faculty of Economics 
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 // MUST HAVE
 $string['pluginname'] = 'Bookmarks (within book chapter)';
@@ -30,7 +50,7 @@ $string['no-js'] = 'The Javascript in your web browser is not enabled. Please en
 // CONFIGURATION FORM
 $string['config_test_warning_enabled'] = 'Beta version';
 $string['config_test_warning_enabled_checkbox'] = 'Display "beta version" warning';
-$string['config_test_warning_enabled_help'] = $string['test-phase-note'];
+$string['config_test_warning_enabled_help'] = 'This is a beta version of a block. Some functionality might not work properly. Please keep in mind that chapter text editing might cause user bookmarks to lose their correct positions within the text. The plugin works exclusively in modern web browsers with Javascript enabled support, including Internet Explorer 9 and higher'; // NOT VALID FOR MOODLE: $string['test-phase-note'];
 
 // EDITING BOOKMARKS
-$string['editing_page_title'] = $string['bookmarks-editor'];
+$string['editing_page_title'] = 'Bookmarks editor'; // NOT VALID FOR MOODLE: $string['bookmarks-editor'];
